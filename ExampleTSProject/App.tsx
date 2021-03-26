@@ -25,7 +25,11 @@
    Colors,
  } from 'react-native/Libraries/NewAppScreen';
  import { AudioConfig, CancellationDetails, CancellationReason, NoMatchDetails, NoMatchReason, ResultReason, SpeechConfig, SpeechRecognizer } from 'microsoft-cognitiveservices-speech-sdk';
+ import DocumentPicker from 'react-native-document-picker';
+ import RNFS from 'react-native-fs';
+ import getPath from '@flyerhq/react-native-android-uri-path'
 
+const Buffer = require('buffer').Buffer;
 const regionOptions = [
   {val:"westus", name:"West US"},
   {val:"westus2", name:"West US2"},
@@ -99,21 +103,34 @@ const Title = () => {
     );
 }
 
+const FilePicker = (props: any) => {
+    return (
+      <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>
+          File:
+          </Text>
+        <View style={styles.sectionDescription}>
+            <Button title="Select File" onPress={ props.onFileButtonPress } />
+        </View>
+      </View>
+    );
+}
+
 const KeyForm = (props: any) => {
     return (
       <View style={styles.tableRowStyle}>
-          <View style={styles.tdStyle}>
-              <Text>
-              Subscription:
-              </Text>
-          </View>
-          <View>
+        <View>
+          <Text>
+          Subscription:
+          </Text>
+        </View>
+        <View style={styles.tableRowStyle}>
             <TextInput 
               key="random1"
               value={props.value}
               onChangeText={(itemValue: any) => props.onChange(itemValue)}
             />
-          </View>
+        </View>
       </View>
     );
 }
@@ -139,7 +156,7 @@ const SelectForm: React.FC<SelectFormProps> = ({ title, value, onSelect, optionL
 }
 
 type RecognitionBtnProps = {
-  onStart: any,
+  onStart: () => void,
   onStop: any,
   recognizing: boolean
 }
@@ -156,8 +173,16 @@ const RecognitionButtons: React.FC<RecognitionBtnProps> = ({onStart, onStop, rec
     );
 }
 
-const getRecognizer = (key: string, region: string, language: string) => {
-  const audioConfig = AudioConfig.fromDefaultMicrophoneInput();
+const getBufferFromUri = async (uri: string): Promise<Buffer> => {
+  const path = getPath(uri);
+  const utf8string = await RNFS.readFile(path, 'base64');
+
+  return Buffer.from(utf8string, 'base64');
+}
+
+const getRecognizer = async (key: string, region: string, language: string, uri: string, filename: string) => {
+  const fileBuf = await getBufferFromUri(uri);
+  const audioConfig = AudioConfig.fromWavFileInput(fileBuf, filename);
 
   const speechConfig = SpeechConfig.fromSubscription(key, region);
 
@@ -269,6 +294,8 @@ type SpeechState = {
   region: string,
   results: string,
   events: string,
+  filename: string,
+  uri: string,
   recognizing: boolean,
 }
 
@@ -276,7 +303,7 @@ class SpeechTable extends Component<{}, SpeechState> {
   private reco: SpeechRecognizer | null;
   constructor(props: any) {
     super(props);
-    this.state = {results: "(from Microphone)", events: "", subscriptionKey: "YOUR_SPEECH_API_KEY", recognizing: false, language: "en-US", region:"westus"};
+    this.state = {uri: "", filename: "", results: "(from File)", events: "", subscriptionKey: "YOUR_SPEECH_API_KEY", recognizing: false, language: "en-US", region:"westus"};
     this.reco = null;
   }
 
@@ -286,9 +313,14 @@ class SpeechTable extends Component<{}, SpeechState> {
     console.log(`updateRegion: ${value}`);
     this.setState({ region: value });
   }
+  updateFile = async () => {
+    const type = DocumentPicker.types.audio;
+    const res = await DocumentPicker.pick({ type });
+    this.setState({ filename: res.name, uri: res.uri });
+  };
 
-  startRecognition = () => {
-    this.reco = getRecognizer(this.state.subscriptionKey, this.state.region, this.state.language);
+  startRecognition = async () => {
+    this.reco = await getRecognizer(this.state.subscriptionKey, this.state.region, this.state.language, this.state.uri, this.state.filename);
     if(this.reco) {
       this.setState({results: "", events: "", recognizing: true});
 
@@ -321,6 +353,7 @@ class SpeechTable extends Component<{}, SpeechState> {
           <KeyForm value={this.state.subscriptionKey} onChange={this.updateKey} />
           <SelectForm title={"Language"} value={this.state.language} onSelect={this.updateLanguage} optionList={optList(languageOptions)} />
           <SelectForm title={"Region"} value={this.state.region} onSelect={this.updateRegion} optionList={optList(regionOptions)} />
+          <FilePicker value={this.state.file} onFileButtonPress={this.updateFile} />
           <RecognitionButtons recognizing={this.state.recognizing} onStart={this.startRecognition} onStop={this.endRecognition}/>
           
           <ResultForm title="Results:" text={this.state.results} />
@@ -378,12 +411,15 @@ class SpeechTable extends Component<{}, SpeechState> {
    },
    sectionTitle: {
      fontSize: 24,
-     fontWeight: '600',
+     fontWeight: '500',
    },
    sectionDescription: {
      marginTop: 8,
      fontSize: 18,
      fontWeight: '400',
+     paddingBottom: 10,
+     paddingLeft: 10,
+     width: '25%',
    },
    highlight: {
      fontWeight: '700',
