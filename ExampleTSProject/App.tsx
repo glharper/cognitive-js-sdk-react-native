@@ -102,11 +102,11 @@ const Title = () => {
 
 const FilePicker = (props: any) => {
     return (
-      <View style={styles.sectionContainer}>
+      <View style={styles.sectionDescription}>
           <Text style={styles.sectionTitle}>
           File:
           </Text>
-        <View style={styles.sectionDescription}>
+        <View>
             <Button title="Select File" onPress={ props.onFileButtonPress } />
         </View>
       </View>
@@ -140,7 +140,7 @@ type SelectFormProps = {
 }
 const SelectForm: React.FC<SelectFormProps> = ({ title, value, onSelect, optionList }) => {
     return (
-      <View style={styles.sectionContainer}>
+      <View style={styles.sectionDescription}>
         <Text>{title}:</Text>
           <Picker
             style={styles.picker}
@@ -161,8 +161,11 @@ type RecognitionBtnProps = {
 const RecognitionButtons: React.FC<RecognitionBtnProps> = ({onStart, onStop, recognizing}) => {
     return (
       <View style={styles.sectionContainer}>
-        <View><Text>Call Speech SDK method:</Text></View>
-        <View style={styles.sectionDescription}>
+        <View>
+          <Text style={styles.sectionTitle}>
+          Call Speech SDK method:
+          </Text></View>
+        <View>
           <Button title="recognize Once" disabled={recognizing} onPress={onStart} />
         </View>
       </View>
@@ -347,10 +350,14 @@ class SpeechTable extends Component<{}, SpeechState> {
         <View style={styles.tableColumnStyle}>
           <Title />
           <KeyForm value={this.state.subscriptionKey} onChange={this.updateKey} />
-          <SelectForm title={"Language"} value={this.state.language} onSelect={this.updateLanguage} optionList={optList(languageOptions)} />
-          <SelectForm title={"Region"} value={this.state.region} onSelect={this.updateRegion} optionList={optList(regionOptions)} />
-          <FilePicker value={this.state.filename} onFileButtonPress={this.updateFile} />
-          <RecognitionButtons recognizing={this.state.recognizing} onStart={this.startRecognition} onStop={this.endRecognition}/>
+          <View style={styles.tableRowStyle}>
+            <SelectForm title={"Language"} value={this.state.language} onSelect={this.updateLanguage} optionList={optList(languageOptions)} />
+            <SelectForm title={"Region"} value={this.state.region} onSelect={this.updateRegion} optionList={optList(regionOptions)} />
+          </View>
+          <View style={styles.tableRowStyle}>
+            <FilePicker value={this.state.filename} onFileButtonPress={this.updateFile} />
+            <RecognitionButtons recognizing={this.state.recognizing} onStart={this.startRecognition} onStop={this.endRecognition}/>
+          </View>
           
           <ResultForm title="Results:" text={this.state.results} />
           <ResultForm title="Events:" text={this.state.events} />
@@ -430,10 +437,9 @@ class SpeechTable extends Component<{}, SpeechState> {
      padding: 2
    },
    tableRowStyle: {
-     flex: 1,
+     flex: 3,
      justifyContent: "flex-start",
      flexDirection: "row",
-     alignItems: "stretch"
    },
    tableColumnStyle: {
      flex: 1,
