@@ -93,12 +93,9 @@ const ResultForm = (props: any) => {
 
 const Title = () => {
     return (
-      <View style={styles.tableRowStyle}>
-          <View style={styles.tdStyle}></View>
-          <View style={styles.tdStyle}>
-            <Text style={styles.sectionTitle}>Speech Recognition</Text>
-            <Text style={styles.highlight}>Microsoft Cognitive Services</Text>
-          </View>
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>Speech Recognition</Text>
+        <Text style={styles.sectionTitle}>Microsoft Cognitive Services</Text>
       </View>
     );
 }
@@ -118,13 +115,13 @@ const FilePicker = (props: any) => {
 
 const KeyForm = (props: any) => {
     return (
-      <View style={styles.tableRowStyle}>
+      <View style={styles.sectionContainer}>
         <View>
           <Text>
           Subscription:
           </Text>
         </View>
-        <View style={styles.tableRowStyle}>
+        <View style={styles.sectionContainer}>
             <TextInput 
               key="random1"
               value={props.value}
@@ -143,7 +140,7 @@ type SelectFormProps = {
 }
 const SelectForm: React.FC<SelectFormProps> = ({ title, value, onSelect, optionList }) => {
     return (
-      <View>
+      <View style={styles.sectionContainer}>
         <Text>{title}:</Text>
           <Picker
             style={styles.picker}
@@ -163,11 +160,10 @@ type RecognitionBtnProps = {
 
 const RecognitionButtons: React.FC<RecognitionBtnProps> = ({onStart, onStop, recognizing}) => {
     return (
-      <View style={styles.tableRowStyle}>
+      <View style={styles.sectionContainer}>
         <View><Text>Call Speech SDK method:</Text></View>
-        <View>
+        <View style={styles.sectionDescription}>
           <Button title="recognize Once" disabled={recognizing} onPress={onStart} />
-          <Button title="stop recognition" disabled={!recognizing} onPress={onStop} />
         </View>
       </View>
     );
@@ -353,7 +349,7 @@ class SpeechTable extends Component<{}, SpeechState> {
           <KeyForm value={this.state.subscriptionKey} onChange={this.updateKey} />
           <SelectForm title={"Language"} value={this.state.language} onSelect={this.updateLanguage} optionList={optList(languageOptions)} />
           <SelectForm title={"Region"} value={this.state.region} onSelect={this.updateRegion} optionList={optList(regionOptions)} />
-          <FilePicker value={this.state.file} onFileButtonPress={this.updateFile} />
+          <FilePicker value={this.state.filename} onFileButtonPress={this.updateFile} />
           <RecognitionButtons recognizing={this.state.recognizing} onStart={this.startRecognition} onStop={this.endRecognition}/>
           
           <ResultForm title="Results:" text={this.state.results} />
@@ -406,7 +402,7 @@ class SpeechTable extends Component<{}, SpeechState> {
 
  const styles = StyleSheet.create({
    sectionContainer: {
-     marginTop: 32,
+     marginTop: 5,
      paddingHorizontal: 24,
    },
    sectionTitle: {
