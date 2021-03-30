@@ -140,7 +140,7 @@ type SelectFormProps = {
 }
 const SelectForm: React.FC<SelectFormProps> = ({ title, value, onSelect, optionList }) => {
     return (
-      <View style={styles.sectionDescription}>
+      <View style={styles.dropdown}>
         <Text>{title}:</Text>
           <Picker
             style={styles.picker}
@@ -409,18 +409,26 @@ class SpeechTable extends Component<{}, SpeechState> {
 
  const styles = StyleSheet.create({
    sectionContainer: {
-     marginTop: 5,
+     marginTop: 2,
      paddingHorizontal: 24,
    },
    sectionTitle: {
      fontSize: 24,
      fontWeight: '500',
    },
-   sectionDescription: {
+   dropdown: {
      marginTop: 8,
      fontSize: 18,
      fontWeight: '400',
-     paddingBottom: 10,
+     paddingBottom: 5,
+     paddingLeft: 10,
+     width: '45%',
+   },
+   sectionDescription: {
+     marginTop: 2,
+     fontSize: 18,
+     fontWeight: '400',
+     paddingBottom: 5,
      paddingLeft: 10,
      width: '25%',
    },
@@ -449,7 +457,7 @@ class SpeechTable extends Component<{}, SpeechState> {
    },
    picker: {
      color: '#333',
-     width: '25%',
+     width: '65%',
    },
  });
 
